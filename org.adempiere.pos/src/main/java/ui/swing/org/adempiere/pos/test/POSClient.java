@@ -46,7 +46,7 @@ public class POSClient {
 			Properties m_ctx = null;
 			Adempiere.startup(true);	//	needs to be here for UI
 			Splash splash = new  Splash("POS Client");
-			final FormFrame frame = new FormFrame(new CFrame("POS Client"));
+			final FormFrame frame = new FormFrame(new CFrame("POS"));
 			//  Focus Traversal
 			KeyboardFocusManager.setCurrentKeyboardFocusManager(AKeyboardFocusManager.get());
 			
@@ -72,6 +72,7 @@ public class POSClient {
 		
 			splash.setText(Msg.getMsg(m_ctx, "Loading"));
 			splash.toFront();
+//			splash.paint(splash.getGraphics());
 		
 			//
 			if (!Adempiere.startupEnvironment(true)) // Load Environment

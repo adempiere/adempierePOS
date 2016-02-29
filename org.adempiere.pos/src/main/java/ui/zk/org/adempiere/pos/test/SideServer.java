@@ -30,16 +30,14 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.compiere.model.MSysConfig;
 import org.compiere.util.CLogger;
 
 
 public class SideServer implements Runnable {
 	
-	public SideServer() {
-		
-    }
-	/**  PORT							*/
-	public 	static final int 		PORT = 5444;
+		/**  PORT							*/
+	public 	static final int 		PORT = 5400;
 	/**	 Sever Socket					*/
     private static ServerSocket 	serverSocket = null;
     /**	 Client Socket					*/
@@ -62,6 +60,12 @@ public class SideServer implements Runnable {
 	public void conectClient(){
 		
 	}
+	/**
+	 * Print File
+	 * @param p_file
+	 * @return
+	 * @return boolean
+	 */
 	public boolean printFile(byte[] p_file) {
 			if(!isStopped()) {
 			    String m_file = System.getProperty("user.home")+"/test.txt";
@@ -106,7 +110,12 @@ public class SideServer implements Runnable {
 	private static boolean isStopped() {
 	        return isStopped;
 	    }
-	 
+	
+	/**
+	 * Stop and close connection
+	 * 
+	 * @return void
+	 */
 	public synchronized void stop(){
         isStopped = true;
         try {
@@ -118,14 +127,27 @@ public class SideServer implements Runnable {
             throw new RuntimeException("Error closing server", e);
         }
     }
-	
+
+	public Socket getClientSocket(){
+		return clientSocket;
+	}
+	public ServerSocket getServerSocket(){
+		return serverSocket;
+	}
+	/**
+	 * Open Server Socket
+	 * 
+	 * @return void
+	 */
 	private static void openServerSocket() {
+		int m_Port = PORT;
         try {
         	if(serverSocket == null)
-        		serverSocket = new ServerSocket(PORT);
+        		m_Port = MSysConfig.getIntValue("ZK_PORT_SERVER_PRINT", PORT);
+        		serverSocket = new ServerSocket(m_Port);
             
         } catch (IOException e) {
-            throw new RuntimeException("Cannot open port "+PORT, e);
+            throw new RuntimeException("Cannot open port "+m_Port, e);
         }
         try {
         	while(true){
@@ -136,4 +158,5 @@ public class SideServer implements Runnable {
 			e1.printStackTrace();
 		}
     }
+	
 }

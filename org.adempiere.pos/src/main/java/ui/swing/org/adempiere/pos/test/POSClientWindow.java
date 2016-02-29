@@ -20,11 +20,16 @@ package org.adempiere.pos.test;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
 import java.awt.Rectangle;
 import java.awt.SystemTray;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 
+import javax.jnlp.BasicService;
+import javax.jnlp.ServiceManager;
+import javax.jnlp.UnavailableServiceException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.swing.JButton;
@@ -35,7 +40,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import org.compiere.grid.ed.VNumber;
+import org.adempiere.pos.POSScalesPanel;
+import org.compiere.db.CConnection;
+import org.compiere.util.DB;
+import org.compiere.util.Ini;
 
 
 /**
@@ -77,6 +85,10 @@ public class POSClientWindow extends JFrame implements ActionListener {
 	private JLabel 		lblPrint;
 	/**	Host				*/
 	private JTextField 	fHost;
+	/**	Print				*/
+	private JLabel 		lblScaleTimer;
+	/**	Host				*/
+	private JTextField 	fScaleTimer;
 	/**	Select Print		*/
 	private JComboBox 	cPrint;	
 	/**	Field Terminal		*/
@@ -124,6 +136,16 @@ public class POSClientWindow extends JFrame implements ActionListener {
 		  }
 		  cPrint.setBounds(140, 67, 180, 23);
 		  
+		  lblScaleTimer = new JLabel();
+		  lblScaleTimer.setText("Mesaure Delay");
+		  lblScaleTimer.setBounds(20, 95, 190, 23);
+		  
+		  fScaleTimer = new JTextField();
+		  fScaleTimer.setText("2000");
+		  fScaleTimer.setBounds(140, 95, 180, 23);
+		  
+		  
+	
 		  fTerminal.setBounds(0,190,300,300);
 	        fTerminal.setBackground(Color.black);
 	        fTerminal.setForeground(Color.green);
@@ -138,9 +160,23 @@ public class POSClientWindow extends JFrame implements ActionListener {
 		  container.add(fHost);
 		  container.add(lblPrint);
 		  container.add(cPrint);
+		  container.add(lblScaleTimer);
+		  container.add(fScaleTimer);
 		  container.add(btnConnect);
 		  container.add(btnDisconnect);
-		  
+
+			GridBagConstraints scalesConstraint = new GridBagConstraints();
+			scalesConstraint.fill = GridBagConstraints.BOTH;
+			scalesConstraint.fill = GridBagConstraints.BOTH;
+			scalesConstraint.weightx = 1;
+			scalesConstraint.weighty = 1;
+			scalesConstraint.gridy = 2;
+
+			
+			
+//			scalesPanel.hidePanel();
+//			add(scalesPanel.getPanel(), scalesConstraint);
+			
 	       JScrollPane scroll = new JScrollPane(fTerminal);
 
 	        scroll.setBounds(new Rectangle(25,150,300,120));
@@ -156,7 +192,7 @@ public class POSClientWindow extends JFrame implements ActionListener {
 	  boolean status;
       if (e.getSource()==btnConnect) {
     	  String m_print = (String)cPrint.getSelectedItem();
-    	  p_Client = new POSClientSide(fHost.getText(), m_print, fTerminal);
+    	  p_Client = new POSClientSide(fHost.getText(), m_print, fTerminal, fScaleTimer.getText());
     	  status = p_Client.isStopped();
     	  
 			btnConnect.setEnabled(status);

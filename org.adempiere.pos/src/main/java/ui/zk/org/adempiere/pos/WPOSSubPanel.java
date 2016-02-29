@@ -24,6 +24,8 @@ import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.session.SessionManager;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.zkoss.zk.ui.DesktopUnavailableException;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.EventListener;
 
 
@@ -49,6 +51,18 @@ public abstract class WPOSSubPanel extends Panel
 		super();
 		this.posPanel = posPanel;
 		setHeight("100%");
+		org.zkoss.zk.ui.Desktop desktop = WPOSSubPanel.this.getDesktop();
+		desktop.enableServerPush(true);
+		try {
+			
+			Executions.activate(Executions.getCurrent().getDesktop());
+		} catch (DesktopUnavailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		init();
 	}	//	PosSubPanel
 	

@@ -17,16 +17,21 @@
 
 package org.adempiere.pos.test;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
 import javax.swing.JTextArea;
+import javax.swing.Timer;
 
+import org.adempiere.pos.POSScalesPanel;
 import org.compiere.model.MSysConfig;
 
 
@@ -37,18 +42,20 @@ import org.compiere.model.MSysConfig;
  * @author victor.perez@e-evolution.com , http://www.e-evolution.com
  **/
 
-public class POSClientSide extends Thread {  
+public class POSClientSide extends Thread implements ActionListener {  
 
-	public POSClientSide(String p_Host, String p_Print, JTextArea m_Terminal) {
+	public POSClientSide(String p_Host, String p_Print, JTextArea m_Terminal, String m_TimerDelay) {
 		m_Host = p_Host;
 		m_Print = p_Print;
 		fTerminal = m_Terminal;
 		m_port = MSysConfig.getIntValue("ZK_PORT_SERVER_PRINT", PORT);
+		System.out.println(m_port);
+		timerDelay = Integer.parseInt(m_TimerDelay);
 		if(!connect())
 			this.start();
 	}
 	/**  Port	Default			*/
-	public 	static final int 	PORT = 5400;
+	public 	static final int 	PORT = 5400;	
 	/** Socket Client 			*/
 	private Socket 				socketClient = null;
 	/** Host Name 				*/
@@ -61,6 +68,9 @@ public class POSClientSide extends Thread {
 	private DataInputStream 	dis = null;
 	/** Field Terminal    		*/
 	private JTextArea 			fTerminal = null;
+	private POSScalesPanel	   scalesPanel = new POSScalesPanel(0);
+	private Timer time;
+	private int timerDelay;
 	private int m_port;
 	/**
 	 * Connect with Server
@@ -89,11 +99,33 @@ public class POSClientSide extends Thread {
 	public void run(){
 		
 	    try {
+	    	time = new Timer(timerDelay, this);
+
+			String aux = "";
 	
 	      while(!isStopped || !isInterrupted()) {
 			 connect();
 	    	 dis = new DataInputStream(socketClient.getInputStream());
-	    	 	    	 
+	    	 String value=dis.readUTF().toString();
+	    	 if(value.equals("Obtener Peso")) {
+	    		 
+	    		
+	    		 DataOutputStream dos = new DataOutputStream( socketClient.getOutputStream() );
+	    		 dos.writeUTF(scalesPanel.getWeight());
+	    		 System.out.println(scalesPanel.getWeight());
+	    		 
+	 			if(!scalesPanel.getWeight().equals("0") && !scalesPanel.getWeight().equals(aux)){
+//	 				time.start();
+	 			}
+	 			aux=scalesPanel.getWeight();
+	    	 }
+	    	 else if(value.equals("Stop")){
+	    		 DataOutputStream dos = new DataOutputStream( socketClient.getOutputStream() );
+	    		 dos.writeUTF("Ultimo");
+	    		 System.out.println("ULTIMO");
+	    	 }
+	    	 else {
+	    	 
 	    		 // Name File
              String name = "zk"+dis.readUTF().toString(); 
 
@@ -125,6 +157,8 @@ public class POSClientSide extends Thread {
     		  }
 	    	 }
   			
+	       }     
+	      	
 	    } catch (IOException e) {
 	    	isStopped=true;
 	    	setText(e.getLocalizedMessage());
@@ -164,9 +198,29 @@ public class POSClientSide extends Thread {
 	public void closeConnect(){
 		
 			isStopped = true;
+			scalesPanel.stopService();
 			this.interrupt();
 			setText("Disconnected");
 		
 	}
 
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			if(e.getSource().equals(time)){
+				if(time.isRunning()){
+				
+					DataOutputStream dos;
+					try {
+						dos = new DataOutputStream( socketClient.getOutputStream() );
+
+						dos.writeUTF("Ultimo");
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+		}
+			
+		}
 }

@@ -90,7 +90,7 @@ public class WPOS extends CPOS implements IFormController, EventListener, POSPan
 
 	private CustomForm 						form 		 = new CustomForm();
 	/**	FormFrame							*/
-	private Iframe 							m_frame;
+	private Iframe 							m_frame		 = new Iframe();
 	/**	Logger								*/
 	private CLogger							log 		 = CLogger.getCLogger(getClass());
 	private DecimalFormat					m_Format;
